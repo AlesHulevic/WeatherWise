@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">WeatherWise</string>
+    <string name="app_name_lable">App name: </string>
+    <string name="about_lable">About</string>
+    <string name="version"> v0.1</string>
+    <string name="version_lable"> Version: </string>
+    <string name="author">Tola Aleksey Aleksandrovich</string>
+    <string name="author_lable">Author: </string>
+    <string name="description_lable">Description: </string>
+    <string name="description">Bla bla bla bla bla</string>
+    <string name="about">About</string>
 </resources>
