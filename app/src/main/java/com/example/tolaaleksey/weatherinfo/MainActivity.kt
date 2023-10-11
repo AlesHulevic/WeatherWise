@@ -16,7 +16,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-
             //val bottomSheetNavigator = rememberBottomSheetNavigator()
 
             NavHost(
