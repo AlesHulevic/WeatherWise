@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.tolaaleksey.weatherinfo.screens.About
+import com.example.tolaaleksey.weatherinfo.screens.EditScreen
 import com.example.tolaaleksey.weatherinfo.screens.Home
 
 
@@ -28,6 +29,9 @@ class MainActivity : ComponentActivity() {
 
                 composable("AboutScreen") {
                     About(navController);
+                }
+                composable("EditScreen") {
+                    EditScreen(navController);
                 }
             }
         }

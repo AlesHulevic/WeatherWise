@@ -94,7 +94,13 @@ fun About(navController: NavController) {
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("HomeScreen") }) {
+                    IconButton(onClick = {
+                        navController.navigate("HomeScreen") {
+                            popUpTo("HomeScreen") {
+                                inclusive = true
+                            }
+                        }
+                    }) {
                         Icon(
                             Icons.Filled.ArrowBack,
                             contentDescription = "Navigation Menu",

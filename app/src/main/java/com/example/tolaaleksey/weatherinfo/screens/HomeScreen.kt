@@ -5,6 +5,7 @@ package com.example.tolaaleksey.weatherinfo.screens
 import android.annotation.SuppressLint
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +19,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -55,45 +58,27 @@ import com.example.tolaaleksey.weatherinfo.classes.Day
 import com.example.tolaaleksey.weatherinfo.classes.HomeViewModule
 import com.example.tolaaleksey.weatherinfo.classes.Weather
 import io.ktor.util.reflect.instanceOf
+import okhttp3.internal.wait
 import kotlin.reflect.KFunction1
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navController: NavController) {
     val viewModel = viewModel<HomeViewModule>()
+    val context = LocalContext.current;
+
     Scaffold(
-        floatingActionButton = { FloatingActionButtonCompose(viewModel) },
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.navigate("AboutScreen") {
-                            popUpTo("AboutScreen") {
-                                inclusive = true
-                            }
-                        }
-                    }) {
-                        Icon(
-                            Icons.Filled.MoreVert,
-                            contentDescription = "Navigation Menu",
-                            tint = Color.White
-                        )
-                    }
-                },
-                title = {
-                    Text(
-                        stringResource(R.string.home),
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 24.sp
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xff1b1b23),
+        floatingActionButton = {
+            FloatingActionButtonCompose(onAdd = {
+                val weather = Weather(6, 80, 34, 60)
+                val day = Day(
+                    weather, "Это описание, братуха"
                 )
-            )
+                viewModel.days.add(day)
+                Toast.makeText(context, "You are add note", Toast.LENGTH_SHORT).show()
+            })
         },
+        topBar = { HomeTopBar(navController) },
         containerColor = Color(0xff1b1b23),
     ) {
         Column(
@@ -105,28 +90,56 @@ fun Home(navController: NavController) {
             HomeScreenContent(
                 items = viewModel.days,
                 onRemove = viewModel::onClickRemoveDay,
-                onAdd = { navController.navigate("HomeScreen") }
+                onAdd = {
+                    val weather = Weather(6, 80, 34, 60)
+                    val day = Day(
+                        weather, "Это описание, братуха"
+                    )
+                    viewModel.days.add(day)
+                    Toast.makeText(context, "You are add note", Toast.LENGTH_SHORT).show()
+                },
+                navController
             )
 
-        }
-        FloatingActionButton(onClick = { }, contentColor = Color.White) {
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FloatingActionButtonCompose(viewModule: HomeViewModule) {
-    FloatingActionButton(onClick = { /*TODO*/ }) {
-        IconButton(onClick = {
-            val weather = Weather(6, 80, 34, 60)
-            val day = Day(
-                weather, "Это описание, братуха"
+fun HomeTopBar(navController: NavController) {
+    TopAppBar(
+        navigationIcon = {
+            IconButton(onClick = {
+                navController.navigate("AboutScreen") {
+                    popUpTo("AboutScreen")
+                }
+            }) {
+                Icon(
+                    Icons.Filled.MoreVert,
+                    contentDescription = "Navigation Menu",
+                    tint = Color.White
+                )
+            }
+        },
+        title = {
+            Text(
+                stringResource(R.string.home),
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                fontSize = 24.sp
             )
-            viewModule.days.add(day)
-        }
-        ) {
-            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color(0xff1b1b23),
+        )
+    )
+}
+
+@Composable
+fun FloatingActionButtonCompose(onAdd: () -> Unit) {
+    FloatingActionButton(onClick = { onAdd() }) {
+        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
     }
 }
 
@@ -135,23 +148,47 @@ fun HomeScreenContent(
     items: List<Day>,
     onRemove: (Day) -> Unit,
     onAdd: () -> Unit,
+    navController: NavController
 ) {
-    val context = LocalContext.current
     Column() {
-        items.forEach {
-            DayItem(
-                day = it,
-                onRemove = {
-                    onRemove(it)
-                    Toast.makeText(context, "You are delete a day", Toast.LENGTH_SHORT)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-        }
+        if (items.isEmpty()) {
+            EmptyListVariant(onAdd)
+        } else {
 
+            items.forEach {
+                DayItem(
+                    day = it,
+                    onRemove = {
+                        onRemove(it)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 5.dp),
+                    navController
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EmptyListVariant(onAdd: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "There is no notes",
+            color = Color.White,
+            fontSize = 36.sp
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            onClick = { onAdd() },
+            modifier = Modifier.width(100.dp)
+        ) {
+            Text(text = "Add")
+        }
     }
 }
 
@@ -160,33 +197,45 @@ fun DayItem(
     day: Day,
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
+    navController: NavController
 ) {
+    val context = LocalContext.current;
     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = modifier) {
-        Column(modifier = Modifier.fillMaxHeight()) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(2.dp)
+        ) {
             Text(text = "Temperature: ${day.weather.temperature} С", color = Color.White)
             Text(text = "Cloudiness: ${day.weather.cloudiness}%", color = Color.White)
             Text(text = "Chance of rain: ${day.weather.chanceOfRain}%", color = Color.White)
             Text(text = "Humidity: ${day.weather.humidity}%", color = Color.White)
         }
 
-        Column(modifier = Modifier
-            .fillMaxHeight()
-            .width(120.dp)
-            .height(100.dp)) {
-            Text(text = "Description:", color = Color.White)
+        Column(
+            modifier = Modifier
+                .height(100.dp)
+                .fillMaxHeight()
+                .fillMaxWidth(0.5f)
+                .padding(2.dp)
+        ) {
+            Text(text = "Description:", color = Color.White, fontWeight = FontWeight.Bold)
             Text(text = day.description, color = Color.White)
         }
 
         Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { onRemove() }) {
+            IconButton(onClick = { navController.navigate("EditScreen") }) {
                 Icon(
                     Icons.Default.Edit,
-                    contentDescription = stringResource(R.string.delete),
+                    contentDescription = "Edit",
                     tint = Color.White
                 )
             }
 
-            IconButton(onClick = { onRemove() }) {
+            IconButton(onClick = {
+                onRemove()
+                Toast.makeText(context, "You are delete note", Toast.LENGTH_SHORT).show()
+            }) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = stringResource(R.string.delete),
