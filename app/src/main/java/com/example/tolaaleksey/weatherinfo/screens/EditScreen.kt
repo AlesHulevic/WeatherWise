@@ -1,7 +1,6 @@
 package com.example.tolaaleksey.weatherinfo.screens
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,8 +18,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -35,17 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.widget.Placeholder
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
 import com.example.tolaaleksey.weatherinfo.classes.Weather
-import java.time.format.TextStyle
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
@@ -61,7 +54,7 @@ fun EditScreen(
         topBar = { EditTopAppBar(navController) },
         containerColor = Color(0xff1b1b23),
     ) {
-        EditField(day)
+        EditFields(day)
     }
 }
 
@@ -101,25 +94,28 @@ fun EditTopAppBar(navController: NavController) {
 }
 
 @Composable
-fun EditField(day: Day) {
+fun EditFields(day: Day?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
         Spacer(modifier = Modifier.height(60.dp))
-        Field("Temperature", Icons.Filled.Check, "C")
-        Field("Humidity", Icons.Filled.Check, "%")
-        Field("Cloudiness", Icons.Filled.Check, "%")
-        Field("Rain", Icons.Filled.Check, "%")
-        Field("Description", Icons.Filled.Check)
+        Field(day?.weather?.temperature.toString(), "Temperature", Icons.Filled.Check, "C")
+        Field(day?.weather?.humidity.toString(), "Humidity", Icons.Filled.Check, "%")
+        Field(day?.weather?.cloudiness.toString(), "Cloudiness", Icons.Filled.Check, "%")
+        Field(day?.weather?.chanceOfRain.toString(), "Rain", Icons.Filled.Check, "%")
+        Field(day?.description.toString(), "Description", Icons.Filled.Check)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Field(name: String, icon: ImageVector, suffix: String = "") {
+fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String = "") {
     var text by remember { mutableStateOf("") }
+    if (mainText.isNotEmpty())
+        text = mainText
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -127,7 +123,10 @@ fun Field(name: String, icon: ImageVector, suffix: String = "") {
             .padding(4.dp)
     ) {
         OutlinedTextField(
-            value = text, onValueChange = { text = it },
+            value = text,
+            onValueChange = {
+                text = it
+            },
             placeholder = {
                 Text(
                     text = name,
@@ -149,6 +148,6 @@ fun Field(name: String, icon: ImageVector, suffix: String = "") {
                 )
             },
             textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
-            )
+        )
     }
 }
