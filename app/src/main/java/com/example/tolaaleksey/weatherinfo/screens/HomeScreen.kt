@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -55,7 +56,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.koin.core.scope.Scope
-
 
 @Composable
 fun Home(navController: NavController) {
@@ -74,14 +74,25 @@ fun Home(navController: NavController) {
         },
         onAdd = {
             navController.navigate("EditScreen?day=${null}")
-            val job = Job()
-            val scope = CoroutineScope(job)
+            val secondScreenResult = navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.getLiveData<String>("day")
 
-            /*scope.launch {
-                viewModel.onClickAddDay(day)
-            }*/
+            secondScreenResult?.value?.let {
+                val gson: Gson = GsonBuilder().create()
+                val dayJson = secondScreenResult.value
+                val dayObject = gson.fromJson(dayJson, Day::class.java)
 
-            Toast.makeText(context, "You are add note", Toast.LENGTH_SHORT).show()
+                val job = Job()
+                val scope = CoroutineScope(job)
+
+                scope.launch {
+                    viewModel.onClickAddDay(dayObject)
+                }
+
+                Toast.makeText(context, "You are add note", Toast.LENGTH_SHORT).show()
+            }
+
         },
         navController,
         myState
@@ -197,7 +208,7 @@ fun DayItem(
         Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = {
                 val gson: Gson = GsonBuilder().create()
-                val dayJson =gson.toJson(day)
+                val dayJson = gson.toJson(day)
                 navController.navigate("EditScreen?day=${dayJson}")
             }) {
                 Icon(

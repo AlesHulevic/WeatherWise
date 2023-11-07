@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,22 +40,49 @@ import androidx.navigation.compose.rememberNavController
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
 import com.example.tolaaleksey.weatherinfo.classes.Weather
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun EditScreen(
     navController: NavController = rememberNavController(),
-    day: Day = Day(
-        Weather(0, 0, 0, 0),
-        stringResource(R.string.description)
-    )
+    day: Day? = null
 ) {
     Scaffold(
         topBar = { EditTopAppBar(navController) },
         containerColor = Color(0xff1b1b23),
-    ) {
-        EditFields(day)
+    ) { values ->
+        Column(Modifier.padding(values)) {
+
+            var newDay: Day?
+            if (day != null) {
+                newDay = day
+            } else {
+                newDay = Day(Weather(0, 0, 0, 0), "")
+            }
+
+            val gson: Gson = GsonBuilder().create()
+            val dayJson = gson.toJson(newDay)
+
+            EditFields(newDay)
+            Button(
+                onClick = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("day", dayJson)
+                    navController.popBackStack()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 100.dp)
+
+            ) {
+                Text(text = "Save")
+            }
+        }
+
     }
 }
 
@@ -97,10 +125,8 @@ fun EditTopAppBar(navController: NavController) {
 fun EditFields(day: Day?) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(modifier = Modifier.height(60.dp))
         Field(day?.weather?.temperature.toString(), "Temperature", Icons.Filled.Check, "C")
         Field(day?.weather?.humidity.toString(), "Humidity", Icons.Filled.Check, "%")
         Field(day?.weather?.cloudiness.toString(), "Cloudiness", Icons.Filled.Check, "%")
@@ -112,9 +138,7 @@ fun EditFields(day: Day?) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String = "") {
-    var text by remember { mutableStateOf("") }
-    if (mainText.isNotEmpty())
-        text = mainText
+    var text by remember { mutableStateOf(mainText) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     val gson: Gson = GsonBuilder().create()
                     val dayJson = navBackStackEntry.arguments?.getString("day")
                     val dayObject = gson.fromJson(dayJson, Day::class.java)
-                    EditScreen(navController, day = dayObject);
+                    EditScreen(navController, day = dayObject)
                 }
             }
         }
