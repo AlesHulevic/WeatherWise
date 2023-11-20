@@ -44,7 +44,6 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.tolaaleksey.weatherinfo.R
-import com.example.tolaaleksey.weatherinfo.classes.Day
 
 @Composable
 fun imageButton(painter: Painter, mainText: String, subText: String) {
@@ -87,7 +86,7 @@ fun imageButton(painter: Painter, mainText: String, subText: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun About(navController: NavController) {
+fun AboutScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -208,5 +207,5 @@ fun About(navController: NavController) {
 @Preview
 @Composable
 fun Prew() {
-    About(navController = rememberNavController())
+    AboutScreen(navController = rememberNavController())
 }

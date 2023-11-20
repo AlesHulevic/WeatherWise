@@ -3,19 +3,18 @@ package com.example.tolaaleksey.weatherinfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.NavType
 
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.tolaaleksey.weatherinfo.classes.Day
-import com.example.tolaaleksey.weatherinfo.screens.About
+import com.example.tolaaleksey.weatherinfo.screens.AboutScreen
 import com.example.tolaaleksey.weatherinfo.screens.EditScreen
-import com.example.tolaaleksey.weatherinfo.screens.Home
+import com.example.tolaaleksey.weatherinfo.screens.HomeScreen
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import kotlinx.serialization.json.JsonBuilder
+import kotlinx.serialization.json.Json
+import java.util.UUID
 
 
 class MainActivity : ComponentActivity() {
@@ -29,18 +28,19 @@ class MainActivity : ComponentActivity() {
                 startDestination = "HomeScreen"
             ) {
                 composable("HomeScreen") {
-                    Home(navController)
+                    HomeScreen(navController)
                 }
 
                 composable("AboutScreen") {
-                    About(navController);
+                    AboutScreen(navController);
                 }
-                composable("EditScreen?day={day}")
+
+                composable("EditScreen?dayId={id}")
                 { navBackStackEntry ->
-                    val gson: Gson = GsonBuilder().create()
-                    val dayJson = navBackStackEntry.arguments?.getString("day")
-                    val dayObject = gson.fromJson(dayJson, Day::class.java)
-                    EditScreen(navController, day = dayObject)
+                    val idString = navBackStackEntry.arguments?.getString("id")
+                    val converter = GsonBuilder().create()
+                    val id = converter.fromJson(idString, UUID::class.java)
+                    EditScreen(navController, id = id)
                 }
             }
         }

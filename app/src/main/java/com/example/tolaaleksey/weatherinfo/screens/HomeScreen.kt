@@ -2,7 +2,6 @@ package com.example.tolaaleksey.weatherinfo.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,27 +40,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
-import com.example.tolaaleksey.weatherinfo.classes.HomeState
+import com.example.tolaaleksey.weatherinfo.Interfaces.HomeState
 import com.example.tolaaleksey.weatherinfo.classes.HomeViewModule
-import com.example.tolaaleksey.weatherinfo.classes.Weather
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.koin.core.scope.Scope
 
 @Composable
-fun Home(navController: NavController) {
+fun HomeScreen(navController: NavController) {
     val viewModel = viewModel<HomeViewModule>()
-    val context = LocalContext.current;
-    val myState: State<HomeState> = viewModel.state.collectAsStateWithLifecycle();
+    val myState: State<HomeState> = viewModel.state.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         onRemove = { day ->
@@ -74,28 +69,9 @@ fun Home(navController: NavController) {
         },
         onAdd = {
             navController.navigate("EditScreen?day=${null}")
-            val secondScreenResult = navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.getLiveData<String>("day")
-
-            secondScreenResult?.value?.let {
-                val gson: Gson = GsonBuilder().create()
-                val dayJson = secondScreenResult.value
-                val dayObject = gson.fromJson(dayJson, Day::class.java)
-
-                val job = Job()
-                val scope = CoroutineScope(job)
-
-                scope.launch {
-                    viewModel.onClickAddDay(dayObject)
-                }
-
-                Toast.makeText(context, "You are add note", Toast.LENGTH_SHORT).show()
-            }
-
         },
         navController,
-        myState
+        myState.value
     )
 }
 
@@ -105,14 +81,14 @@ fun HomeScreenContent(
     onRemove: (Day) -> Unit,
     onAdd: () -> Unit,
     navController: NavController,
-    state: State<HomeState>
+    value: HomeState
 ) {
     Scaffold(
         floatingActionButton = { FloatingActionButtonCompose(onAdd = onAdd) },
         topBar = { HomeTopBar(navController) },
         containerColor = Color(0xff1b1b23),
     ) { values ->
-        when (state.value) {
+        when (value) {
             is HomeState.Empty -> EmptyListVariant(
                 onAdd,
                 Modifier
@@ -121,7 +97,7 @@ fun HomeScreenContent(
             )
 
             is HomeState.DisplayingDays -> LazyColumn(modifier = Modifier.padding(values)) {
-                itemsIndexed(items = (state.value as HomeState.DisplayingDays).days) { _, item ->
+                itemsIndexed(items = value.days) { _, item ->
                     DayItem(
                         day = item,
                         onRemove = {
@@ -149,7 +125,6 @@ fun HomeScreenContent(
                     .padding(values)
             )
         }
-
     }
 }
 
@@ -206,11 +181,7 @@ fun DayItem(
         }
 
         Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = {
-                val gson: Gson = GsonBuilder().create()
-                val dayJson = gson.toJson(day)
-                navController.navigate("EditScreen?day=${dayJson}")
-            }) {
+            IconButton(onClick = { navController.navigate("EditScreen?dayId=${day.id}") }) {
                 Icon(
                     Icons.Default.Edit,
                     contentDescription = "Edit",
@@ -236,7 +207,7 @@ fun DayItem(
 @Composable
 fun preview() {
     val navController = rememberNavController()
-    Home(navController = navController)
+    HomeScreen(navController = navController)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

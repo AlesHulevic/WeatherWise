@@ -1,21 +1,15 @@
-package com.example.tolaaleksey.weatherinfo.classes
-
 import com.example.tolaaleksey.weatherinfo.Interfaces.DayDataSource
+import com.example.tolaaleksey.weatherinfo.Interfaces.DaysRepository
+import com.example.tolaaleksey.weatherinfo.classes.Day
+import com.example.tolaaleksey.weatherinfo.classes.HomeViewModule
+import com.example.tolaaleksey.weatherinfo.classes.InMemoryDaysDatasource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.util.UUID
 
-interface DaysRepository {
-    fun getDay(id: UUID?): Flow<Day?>
-    fun getDays(): Flow<List<Day>>
+object DayRepositoryImpl : DaysRepository {
 
-    suspend fun upsert(day: Day)
-    suspend fun delete(id: UUID)
-}
-
-object DaysRepositoryImpl : DaysRepository {
-
-    private val dataSource: DayDataSource = HomeViewModule.InMemoryDaysDatasource
+    private val dataSource: DayDataSource = InMemoryDaysDatasource
 
     override fun getDay(id: UUID?): Flow<Day?> {
         if (id == null) {

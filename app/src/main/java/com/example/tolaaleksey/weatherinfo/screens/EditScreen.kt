@@ -3,10 +3,7 @@ package com.example.tolaaleksey.weatherinfo.screens
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 
 import androidx.compose.material.icons.Icons
@@ -22,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,59 +29,85 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.tolaaleksey.weatherinfo.Interfaces.HomeState
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
+import com.example.tolaaleksey.weatherinfo.classes.EditState
+import com.example.tolaaleksey.weatherinfo.classes.EditViewModule
 import com.example.tolaaleksey.weatherinfo.classes.Weather
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
 fun EditScreen(
     navController: NavController = rememberNavController(),
-    day: Day? = null
+    id: UUID? = null
+) {
+    val viewModel = viewModel<EditViewModule>()
+
+    viewModel.setStateFlow(id)
+    val myState: State<EditState> = viewModel.state.collectAsStateWithLifecycle()
+
+    EditScreenContent(
+        navController,
+        myState.value
+    ) { day ->
+        viewModel.viewModelScope.launch {
+            viewModel.onClickSave(day = day)
+            navController.popBackStack()
+        }
+    }
+}
+
+@Composable
+fun EditScreenContent(
+    navController: NavController,
+    stateValue: EditState,
+    onSave: (Day) -> Unit
 ) {
     Scaffold(
         topBar = { EditTopAppBar(navController) },
-        containerColor = Color(0xff1b1b23),
+        containerColor = colorResource(id = R.color.night_blue),
     ) { values ->
         Column(Modifier.padding(values)) {
 
-            var newDay: Day?
-            if (day != null) {
-                newDay = day
-            } else {
-                newDay = Day(Weather(0, 0, 0, 0), "")
-            }
+            when (stateValue) {
+                is EditState.Loading -> {
 
-            val gson: Gson = GsonBuilder().create()
-            val dayJson = gson.toJson(newDay)
+                }
 
-            EditFields(newDay)
-            Button(
-                onClick = {
-                    navController.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("day", dayJson)
-                    navController.popBackStack()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 100.dp)
-
-            ) {
-                Text(text = "Save")
+                is EditState.DisplayBook -> {
+                    var newDay = Day(Weather(0, 0, 0, 0), "")
+                    if (stateValue.day != null) {
+                        newDay = stateValue.day
+                    }
+                    
+                    newDay = EditFields(newDay)
+                    Button(
+                        onClick = {
+                            onSave(newDay)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 100.dp),
+                    ) { Text(text = "Save") }
+                }
             }
         }
-
     }
 }
 
@@ -101,12 +126,7 @@ fun EditTopAppBar(navController: NavController) {
         navigationIcon = {
             IconButton(
                 onClick = {
-                    navController.navigate("HomeScreen") {
-                        popUpTo("HomeScreen")
-                        {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack()
                 }) {
                 Icon(
                     Icons.Filled.ArrowBack,
@@ -116,28 +136,44 @@ fun EditTopAppBar(navController: NavController) {
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xff1b1b23),
+            containerColor = colorResource(id = R.color.night_blue),
         )
     )
 }
 
 @Composable
-fun EditFields(day: Day?) {
+fun EditFields(day: Day): Day {
+    var temerature = day.weather.temperature.toString()
+    var humidity = day.weather.humidity.toString()
+    var cloudiness = day.weather.cloudiness.toString()
+    var chanceOfRain = day.weather.chanceOfRain.toString()
+    var description = day.description
+
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp)
     ) {
-        Field(day?.weather?.temperature.toString(), "Temperature", Icons.Filled.Check, "C")
-        Field(day?.weather?.humidity.toString(), "Humidity", Icons.Filled.Check, "%")
-        Field(day?.weather?.cloudiness.toString(), "Cloudiness", Icons.Filled.Check, "%")
-        Field(day?.weather?.chanceOfRain.toString(), "Rain", Icons.Filled.Check, "%")
-        Field(day?.description.toString(), "Description", Icons.Filled.Check)
+        temerature =
+            Field(temerature, "Temperature", Icons.Filled.Check, "C")
+        humidity = Field(humidity, "Humidity", Icons.Filled.Check, "%")
+        cloudiness =
+            Field(cloudiness, "Cloudiness", Icons.Filled.Check, "%")
+        chanceOfRain =
+            Field(chanceOfRain, "Rain", Icons.Filled.Check, "%")
+        description = Field(description, "Description", Icons.Filled.Check)
     }
+    return Day(
+        Weather(
+            temerature.toInt(),
+            humidity.toInt(),
+            cloudiness.toInt(),
+            chanceOfRain.toInt()
+        ), description
+    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String = "") {
+fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String = ""): String {
     var text by remember { mutableStateOf(mainText) }
 
     Row(
@@ -174,4 +210,5 @@ fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String
             textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
         )
     }
+    return text
 }
