@@ -1,5 +1,6 @@
 package com.example.tolaaleksey.weatherinfo.screens
 
+import LoadingAnimation
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -118,12 +119,15 @@ fun HomeScreenContent(
                     .padding(values)
             )
 
-            HomeState.Loading -> EmptyListVariant(
-                onAdd,
-                Modifier
-                    .fillMaxSize()
-                    .padding(values)
-            )
+            HomeState.Loading -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LoadingAnimation(circleColor = Color.White)
+                }
+            }
         }
     }
 }

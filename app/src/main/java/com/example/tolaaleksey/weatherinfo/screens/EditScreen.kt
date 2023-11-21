@@ -1,8 +1,11 @@
 package com.example.tolaaleksey.weatherinfo.screens
 
+import LoadingAnimation
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 
@@ -87,7 +90,13 @@ fun EditScreenContent(
 
             when (stateValue) {
                 is EditState.Loading -> {
-
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LoadingAnimation(circleColor = Color.White)
+                    }
                 }
 
                 is EditState.DisplayBook -> {
@@ -95,7 +104,7 @@ fun EditScreenContent(
                     if (stateValue.day != null) {
                         newDay = stateValue.day
                     }
-                    
+
                     newDay = EditFields(newDay)
                     Button(
                         onClick = {
