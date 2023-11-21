@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,7 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,14 +43,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.tolaaleksey.weatherinfo.Interfaces.HomeState
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
 import com.example.tolaaleksey.weatherinfo.classes.EditState
 import com.example.tolaaleksey.weatherinfo.classes.EditViewModule
 import com.example.tolaaleksey.weatherinfo.classes.Weather
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -67,7 +65,7 @@ fun EditScreen(
 
     EditScreenContent(
         navController,
-        myState.value
+        myState.value,
     ) { day ->
         viewModel.viewModelScope.launch {
             viewModel.onClickSave(day = day)
@@ -81,6 +79,7 @@ fun EditScreenContent(
     navController: NavController,
     stateValue: EditState,
     onSave: (Day) -> Unit
+
 ) {
     Scaffold(
         topBar = { EditTopAppBar(navController) },
@@ -105,10 +104,50 @@ fun EditScreenContent(
                         newDay = stateValue.day
                     }
 
-                    newDay = EditFields(newDay)
+                    var temperature = newDay.weather.temperature.toString()
+                    var humidity = newDay.weather.humidity.toString()
+                    var cloudiness = newDay.weather.cloudiness.toString()
+                    var chanceOfRain = newDay.weather.chanceOfRain.toString()
+                    var description = newDay.description
+
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        temperature =
+                            inputField(
+                                temperature, "Temperature", Icons.Filled.Check, "C",
+                                KeyboardOptions(keyboardType = KeyboardType.Number)
+                            )
+                        humidity = inputField(
+                            humidity, "Humidity", Icons.Filled.Check, "%",
+                            KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        cloudiness = inputField(
+                            cloudiness, "Cloudiness", Icons.Filled.Check, "%",
+                            KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        chanceOfRain = inputField(
+                            chanceOfRain, "Rain", Icons.Filled.Check, "%",
+                            KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                        description = inputField(description, "Description", Icons.Filled.Check)
+                    }
+
+                    newDay.description = description
+
                     Button(
                         onClick = {
-                            onSave(newDay)
+                            onSave(
+                                Day(
+                                    Weather(
+                                        temperature.toInt(),
+                                        humidity.toInt(),
+                                        cloudiness.toInt(),
+                                        chanceOfRain.toInt()
+                                    ), description, id = stateValue.day?.id ?: UUID.randomUUID()
+                                )
+                            )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -146,43 +185,19 @@ fun EditTopAppBar(navController: NavController) {
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = colorResource(id = R.color.night_blue),
-        )
+        ),
     )
 }
 
 @Composable
-fun EditFields(day: Day): Day {
-    var temerature = day.weather.temperature.toString()
-    var humidity = day.weather.humidity.toString()
-    var cloudiness = day.weather.cloudiness.toString()
-    var chanceOfRain = day.weather.chanceOfRain.toString()
-    var description = day.description
+fun inputField(
+    mainText: String = "",
+    name: String,
+    icon: ImageVector,
+    suffix: String = "",
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 20.dp)
-    ) {
-        temerature =
-            Field(temerature, "Temperature", Icons.Filled.Check, "C")
-        humidity = Field(humidity, "Humidity", Icons.Filled.Check, "%")
-        cloudiness =
-            Field(cloudiness, "Cloudiness", Icons.Filled.Check, "%")
-        chanceOfRain =
-            Field(chanceOfRain, "Rain", Icons.Filled.Check, "%")
-        description = Field(description, "Description", Icons.Filled.Check)
-    }
-    return Day(
-        Weather(
-            temerature.toInt(),
-            humidity.toInt(),
-            cloudiness.toInt(),
-            chanceOfRain.toInt()
-        ), description
-    )
-}
-
-@Composable
-fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String = ""): String {
+): String {
     var text by remember { mutableStateOf(mainText) }
 
     Row(
@@ -217,6 +232,7 @@ fun Field(mainText: String = "", name: String, icon: ImageVector, suffix: String
                 )
             },
             textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+            keyboardOptions = keyboardOptions
         )
     }
     return text

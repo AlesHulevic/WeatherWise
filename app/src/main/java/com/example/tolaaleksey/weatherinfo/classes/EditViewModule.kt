@@ -14,7 +14,6 @@ sealed interface EditState {
 }
 
 class EditViewModule : ViewModel() {
-    fun getDay(id: UUID) = DayRepositoryImpl.getDay(id)
     suspend fun onClickSave(day: Day) = DayRepositoryImpl.upsert(day)
 
     val state = MutableStateFlow<EditState>(EditState.Loading)
