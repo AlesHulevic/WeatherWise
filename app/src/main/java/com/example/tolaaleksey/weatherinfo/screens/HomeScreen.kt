@@ -47,16 +47,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
 import com.example.tolaaleksey.weatherinfo.Interfaces.HomeState
-import com.example.tolaaleksey.weatherinfo.classes.HomeViewModule
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import com.example.tolaaleksey.weatherinfo.classes.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    val viewModel = viewModel<HomeViewModule>()
+
+    val viewModel = koinInject<HomeViewModel>()
     val myState: State<HomeState> = viewModel.state.collectAsStateWithLifecycle()
 
     HomeScreenContent(

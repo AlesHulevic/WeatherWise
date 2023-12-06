@@ -5,14 +5,14 @@ import android.os.Bundle
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 
-class WeatherWise : Application(){
+class WeatherWise : Application() {
 
     override fun onCreate() {
-    super.onCreate()
+        super.onCreate()
 
         startKoin {
             androidContext(applicationContext)
-            modules()
+            modules(appModule)
         }
     }
 }

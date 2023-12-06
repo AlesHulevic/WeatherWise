@@ -49,6 +49,7 @@ import com.example.tolaaleksey.weatherinfo.classes.EditState
 import com.example.tolaaleksey.weatherinfo.classes.EditViewModule
 import com.example.tolaaleksey.weatherinfo.classes.Weather
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import java.util.UUID
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -58,7 +59,7 @@ fun EditScreen(
     navController: NavController = rememberNavController(),
     id: UUID? = null
 ) {
-    val viewModel = viewModel<EditViewModule>()
+    val viewModel = koinInject<EditViewModule>()
 
     viewModel.setStateFlow(id)
     val myState: State<EditState> = viewModel.state.collectAsStateWithLifecycle()
@@ -98,7 +99,7 @@ fun EditScreenContent(
                     }
                 }
 
-                is EditState.DisplayBook -> {
+                is EditState.DisplayDay -> {
                     var newDay = Day(Weather(0, 0, 0, 0), "")
                     if (stateValue.day != null) {
                         newDay = stateValue.day
