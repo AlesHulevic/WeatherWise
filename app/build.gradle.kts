@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -52,11 +54,11 @@ android {
     }
 }
 
-//ksp {
-//arg("room.schemaLocation", "$projectDir/schema")
-//arg("room.incremental", "true")
-//arg("room.expandProjection", "true")
-//}
+ksp {
+    arg("room.schemaLocation", "$projectDir/schema")
+    arg("room.incremental", "true")
+    arg("room.expandProjection", "true")
+}
 
 dependencies {
 
@@ -64,7 +66,7 @@ dependencies {
     annotationProcessor(libs.androidx.room.compiler)
 
     // To use Kotlin Symbol Processing (KSP)
-    //ksp(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation(libs.room.ktx)
@@ -147,6 +149,8 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+
+    implementation(libs.json.property)
 
     implementation(libs.androidx.navigation)
     implementation(libs.lifeCycle)

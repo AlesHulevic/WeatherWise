@@ -2,7 +2,7 @@ package com.example.tolaaleksey.weatherinfo
 
 import DaysRepositoryImpl
 import RemoteDaysDataSourceImpl
-import com.example.tolaaleksey.weatherinfo.Database.Core.AppDatabase
+import com.example.tolaaleksey.weatherinfo.Database.Core.AppDataBase
 import com.example.tolaaleksey.weatherinfo.Database.daos.DayDao
 import com.example.tolaaleksey.weatherinfo.Interfaces.DayDataSource
 import com.example.tolaaleksey.weatherinfo.Interfaces.DaysRepository
@@ -18,8 +18,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val databaseModule = module {
-    single<AppDatabase> { AppDatabase(context = get()) }
-    single<DayDao> { get<AppDatabase>().dayDao() }
+    single<AppDataBase> { AppDataBase(context = get()) }
+    single<DayDao> { get<AppDataBase>().dayDao() }
 }
 
 val RemoteDataBaseModule = module {

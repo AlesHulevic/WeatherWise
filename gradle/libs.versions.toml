@@ -108,7 +108,11 @@ androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "ro
 androidx-room-rxjava2 = { module = "androidx.room:room-rxjava2", version.ref = "room-rxjava2" }
 androidx-room-rxjava3 = { module = "androidx.room:room-rxjava3", version.ref = "room-rxjava3" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room-testing" }
+json-property = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.13.0" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.9.10" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.10-1.0.13" }

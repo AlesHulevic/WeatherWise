@@ -8,7 +8,10 @@ import java.util.UUID
 @Entity(tableName = DayEntity.TableName)
 class DayEntity(
     @PrimaryKey val id: UUID = UUID.randomUUID(),
-    val weather: Weather,
+    val temperature: Int,
+    val humidity: Int,
+    val cloudiness: Int,
+    val chanceOfRain: Int,
     var description: String
 ) {
     companion object {

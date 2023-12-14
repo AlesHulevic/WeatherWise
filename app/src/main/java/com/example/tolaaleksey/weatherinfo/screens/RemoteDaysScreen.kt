@@ -1,5 +1,6 @@
 package com.example.tolaaleksey.weatherinfo.screens
 
+import LoadingAnimation
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,38 +38,71 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.tolaaleksey.weatherinfo.Interfaces.HomeState
 import com.example.tolaaleksey.weatherinfo.R
 import com.example.tolaaleksey.weatherinfo.classes.Day
+import com.example.tolaaleksey.weatherinfo.classes.RemoteDaysState
+import com.example.tolaaleksey.weatherinfo.classes.RemoteDaysViewModel
 import com.example.tolaaleksey.weatherinfo.classes.Weather
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 import java.util.*
 
 @Composable
 fun RemoteDaysScreen(navController: NavController) {
+    val viewModel = koinInject<RemoteDaysViewModel>()
+
+    val myState: State<RemoteDaysState> = viewModel.state.collectAsStateWithLifecycle()
     RemoteDaysScreenContent(
-        listOf(Day(Weather(0, 0, 0, 0), "")),
-        navController = navController
+        myState.value,
+        navController = navController,
+        onAdd = { day ->
+            viewModel.viewModelScope.launch {
+                viewModel.onClickAddDay(day);
+                navController.popBackStack()
+            }
+        }
     )
 }
 
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun RemoteDaysScreenContent(days: List<Day>, navController: NavController) {
+fun RemoteDaysScreenContent(
+    value: RemoteDaysState,
+    navController: NavController,
+    onAdd: (day: Day) -> Unit
+) {
     Scaffold(
         topBar = { RemoteDaysTopAppBar(navController) },
         containerColor = Color(0xff1b1b23),
     ) { values ->
-        LazyColumn(modifier = Modifier.padding(values)) {
-            itemsIndexed(items = days) { _, item ->
-                RemoteDayItem(
-                    day = item,
-                    onAdd = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 5.dp),
-                )
+        when (value) {
+            is RemoteDaysState.Loading -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LoadingAnimation(circleColor = Color.White)
+                }
+            }
+
+            is RemoteDaysState.DisplayingDays -> LazyColumn(modifier = Modifier.padding(values)) {
+                itemsIndexed(items = value.days) { _, item ->
+                    RemoteDayItem(
+                        day = item,
+                        onAdd = onAdd,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 5.dp),
+                    )
+                }
             }
         }
     }
@@ -106,7 +141,7 @@ fun RemoteDaysTopAppBar(navController: NavController) {
 @Composable
 fun RemoteDayItem(
     day: Day,
-    onAdd: () -> Unit,
+    onAdd: (day: Day) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current;
@@ -127,14 +162,14 @@ fun RemoteDayItem(
         }
 
         IconButton(onClick = {
-            onAdd()
+            onAdd(day)
             Toast.makeText(context, "You are add note", Toast.LENGTH_SHORT).show()
         }) {
             Icon(
                 Icons.Default.AddCircle,
                 contentDescription = null,
                 tint = Color.Green,
-                modifier= Modifier.fillMaxSize(1f),
+                modifier = Modifier.fillMaxSize(1f),
             )
         }
     }
@@ -144,5 +179,5 @@ fun RemoteDayItem(
 @Composable
 fun RemoteDaysPreview() {
     val navController = rememberNavController()
-    RemoteDaysScreenContent(listOf(Day(Weather(0, 0, 0, 0), "")), navController)
+    //RemoteDaysScreenContent(listOf(Day(Weather(0, 0, 0, 0), "")), navController)
 }

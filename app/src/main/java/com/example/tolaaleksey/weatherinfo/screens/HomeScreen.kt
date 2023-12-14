@@ -19,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -218,6 +220,17 @@ fun preview() {
 @Composable
 fun HomeTopBar(navController: NavController) {
     TopAppBar(
+        actions = {
+            IconButton(onClick = {
+                navController.navigate("RemoteDays")
+            }) {
+                Icon(
+                    Icons.Filled.MailOutline,
+                    contentDescription = "Navigation Menu",
+                    tint = Color.White
+                )
+            }
+        },
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate("AboutScreen") {
@@ -225,7 +238,7 @@ fun HomeTopBar(navController: NavController) {
                 }
             }) {
                 Icon(
-                    Icons.Filled.MoreVert,
+                    Icons.Filled.Info,
                     contentDescription = "Navigation Menu",
                     tint = Color.White
                 )

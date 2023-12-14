@@ -8,13 +8,13 @@ import com.example.tolaaleksey.weatherinfo.Database.daos.DayDao
 import com.example.tolaaleksey.weatherinfo.Database.entities.DayEntity
 
 @Database(entities = [DayEntity::class], version = 1)
-internal abstract class AppDatabase : RoomDatabase() {
+internal abstract class AppDataBase : RoomDatabase() {
     abstract fun dayDao(): DayDao
 }
 
-internal fun AppDatabase(context: Context) = Room.databaseBuilder(
+internal fun AppDataBase(context: Context) = Room.databaseBuilder(
     context,
-    AppDatabase::class.java,
+    AppDataBase::class.java,
     "days_database"
 )
     .fallbackToDestructiveMigration()

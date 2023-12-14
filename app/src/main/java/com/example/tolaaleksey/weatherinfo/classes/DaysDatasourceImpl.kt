@@ -34,7 +34,12 @@ internal class DaysDatasourceImpl(private val dao: DayDao) : DayDataSource {
 
 fun transformToDay(dayEntity: DayEntity?): Day {
     return if (dayEntity != null) Day(
-        dayEntity.weather,
+        Weather(
+            dayEntity.temperature,
+            dayEntity.humidity,
+            dayEntity.cloudiness,
+            dayEntity.chanceOfRain
+        ),
         dayEntity.description,
         dayEntity.id
     ) else Day(Weather(0, 0, 0, 0), "");
@@ -43,7 +48,10 @@ fun transformToDay(dayEntity: DayEntity?): Day {
 fun transformToDayEntity(day: Day): DayEntity {
     return DayEntity(
         day.id,
-        day.weather,
+        day.weather.temperature,
+        day.weather.humidity,
+        day.weather.cloudiness,
+        day.weather.chanceOfRain,
         day.description
     )
 }

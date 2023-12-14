@@ -11,6 +11,7 @@ import com.example.tolaaleksey.weatherinfo.classes.Day
 import com.example.tolaaleksey.weatherinfo.screens.AboutScreen
 import com.example.tolaaleksey.weatherinfo.screens.EditScreen
 import com.example.tolaaleksey.weatherinfo.screens.HomeScreen
+import com.example.tolaaleksey.weatherinfo.screens.RemoteDaysScreen
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.serialization.json.Json
@@ -33,6 +34,9 @@ class MainActivity : ComponentActivity() {
 
                 composable("AboutScreen") {
                     AboutScreen(navController);
+                }
+                composable("RemoteDays") {
+                    RemoteDaysScreen(navController);
                 }
 
                 composable("EditScreen?dayId={id}")
